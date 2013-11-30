@@ -32,7 +32,8 @@ def check_in_corpus(word):
 #			print word,k
 		if word == k.lower():
 #			print word,sms_dictionary[k]
-			return sms_dictionary[k]
+			wrd = sms_dictionary[k]
+			return wrd[0:len(wrd)-1]
 	return None
 
 class input_from_xml():
