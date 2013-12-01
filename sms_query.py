@@ -10,6 +10,7 @@ import string
 from collections import defaultdict
 phi = 1
 sms_dictionary = {}
+f = open("output.txt","wb")
 sms_vowels = ["a","e","i","o"]
 numbers = {1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",9:"nine",0:"zero"}
 
@@ -198,14 +199,21 @@ if __name__=="__main__":
 #	for k,v in sms_dictionary.items():
 #		print k,sms_dictionary[k]
 	
-	print len(sms_dictionary)
+#	print len(sms_dictionary)
 
-	for query in sms_queries:
+	for query in sms_queries[0:5]:
 		pruned_word_list = []
 		for ch in string.punctuation:
 			if ch!= '#':
 				query = query.replace(ch,"")
+		f.write("INPUT NOISY SMS QUERY:\n")
+		print "INPUT NOISY SMS QUERY:\n"
+		f.write(query)
 		print query
+		f.write("\n")
+		print "\n"
+		f.write("\n")
+		print "\n"
 		sms_query_words = query.split(" ")
 		for i in range(0,len(sms_query_words)):
 			print sms_query_words[i]
@@ -217,17 +225,36 @@ if __name__=="__main__":
 	#			print temp_list
 				pruned_word_list.append(temp_list)
 			else:
-				pruned_word_list.append(similarity_measure(sms_query_words[i],dictionary))
-
+				wrdlist = similarity_measure(sms_query_words[i],dictionary)
+				if not wrdlist:
+					wrdlist.append(sms_query_words[i])
+				pruned_word_list.append(wrdlist)
+		f.write("CLEANED WORDS FOR NOISY SMS QUERY:\n")
+		print "CLEANED WORDS FOR NOISY SMS QUERY"
 		for i in range(0,len(pruned_word_list)):
+			f.write("NOISY WORD:\n")
+			f.write(sms_query_words[i])
+			f.write("PREDICTED CLEANED WORDS:\n")
+			for wrds in pruned_word_list[i]:
+				f.write(wrds+"   ")
 			print sms_query_words[i],pruned_word_list[i]
-
+			f.write("\n")
+		f.write("\n")
+		print "\n"
+		f.write("\n")
+		print "\n"
 		cleaned_sms_sentence = ""
 		for i in range(0,len(pruned_word_list)):
 			cleaned_sms_sentence = cleaned_sms_sentence + pruned_word_list[i][0]
 			cleaned_sms_sentence = cleaned_sms_sentence + " "
+		f.write("CLEANED NOISY SMS QUERY:\n")
+		print "CLEANED NOISY SMS QUERY\n"
+		f.write(cleaned_sms_sentence)
 		print cleaned_sms_sentence
-		break
+		f.write("\n")
+		print "\n"
+		f.write("\n")
+		print "\n"
 
 
 

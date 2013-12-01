@@ -198,6 +198,24 @@ class input_from_xml():
 			questions[domain].append(question)
 		return questions
 
+	def check_in_sms_xml(self,query):
+		tree = ET.parse("/home/rohit/Dropbox/Project/Faq/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/SMS_Queries/Monolingual Task/English/_ENG_2013_MONO_TRAINING_DATA.xml")
+		root = tree.getroot()
+
+		for i in range(0,len(root)):
+			if root[i][1].text == query:
+					return root[i][2][0].text
+
+
+	def check_in_faq_xml(self,query):
+		tree = ET.parse("/home/rohit/Dropbox/Project/Faq/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/FAQs/English/eng.xml")
+		root = tree.getroot()
+
+		for i in range(0,len(root)):
+			if root[i][2].text == query:
+				return root[i][0].text
+
+
 	# Build dictionary from given questions in training data
 	def build_dictionary(self,questions):
 		dictionary = []
@@ -453,13 +471,19 @@ if __name__=="__main__":
 		top_questions = sorted(scores, key=scores.__getitem__)
 		top_questions = top_questions[::-1]
 		top_questions = top_questions[0:5]
-		reciprocal_rank = retreive_rank(top_questions,faq_list)
-		mean_reciprocal_rank = mean_reciprocal_rank + reciprocal_rank
 
-
-
-
-		
-
-
-		
+		if indomain == 1:
+			sms_query_id  = c.check_in_sms_xml(query)
+			faq_query_ids = []
+			for quest in top_questions:
+				faq_query_ids.append(c.check_in_faq_xml(top_questions))
+			index = 0
+			for i in range(0,len(faq_query_ids)):
+				if faq_query_ids[i] == sms_query_id:
+					index = i+1
+					break
+			reciprocal_rank = 0
+			if index != 0:
+				reciprocal_rank = 1/index
+			print "reciprocal rank for query: %d", %(reciprocal_rank) 
+			mean_reciprocal_rank = mean_reciprocal_rank + reciprocal_rank

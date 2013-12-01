@@ -9,6 +9,24 @@ import logging
 import string
 from collections import defaultdict
 phi = 1
+sms_dictionary = {}
+sms_vowels = ["a","e","i","o"]
+
+def preprocess_sms_dictionary():
+	f  = open("sms_words.txt","rb")
+	lines = f.readlines()
+
+	for line in lines:
+		sword,nword = line.split("[]")
+		sms_dictionary[sword] = nword
+
+
+def check_in_corpus(word):
+	for k,v in sms_dictionary.items():
+		word = word.lower()
+		if word == sms_dictionary[k].lower():
+			return sms_dictionary[k]
+	return None
 
 class input_from_xml():
 	# fetch questions input from eng.xml
@@ -118,8 +136,12 @@ def similarity_measure(word,dictionary):
 			set_of_words.append(d)
 
 	dict_list = {}
+
 	if not set_of_words:
 		return None
+	elif word in sms_vowels:
+		set_of_words.append(word)
+		return set_of_words
 	else:
 		for w in set_of_words:
 			lcs_value = lcs(w,word,len(w),len(word))
@@ -130,9 +152,15 @@ def similarity_measure(word,dictionary):
 				dict_list[w] = (lcs_value/(edit_distance_value*1.0))
 
 	dict_list = sorted(dict_list, key=dict_list.__getitem__)
-#	print dict_list
-	return dict_list[::-1]
-
+#   dictionary to list conversion
+	temp_list = []
+	for wrd in dict_list:
+		if wrd == word:
+			temp_list.append(word)
+			return temp_list
+	dict_list = dict_list[::-1]
+#	print dict_list[0:5]
+	return dict_list[0:5]
 
 if __name__=="__main__":
 	c = input_from_xml()
@@ -142,7 +170,11 @@ if __name__=="__main__":
 	dictionary.sort()
 #	print dictionary[10000:10500]
 	sms_queries = c.fetch_sms_queries()
+	preprocess_sms_dictionary()
 
+	for k,v in sms_dictionary.items():
+		print k,sms_dictionary[k]
+	
 	for query in sms_queries:
 		pruned_word_list = []
 		for ch in string.punctuation:
@@ -151,8 +183,14 @@ if __name__=="__main__":
 		for i in range(0,len(sms_query_words)):
 			print sms_query_words[i]
 			sms_query_words[i] = sms_query_words[i].lower()
-			pruned_word_list.append(similarity_measure(sms_query_words[i],dictionary))
-#		print pruned_word_list
+			corpus_word = check_in_corpus(sms_query_words[i])
+			if corpus_word:
+				temp_list = []
+				temp_list.append(corpus_word)
+				print temp_list
+				pruned_word_list.append(temp_list)
+			else:
+				pruned_word_list.append(similarity_measure(sms_query_words[i],dictionary))	
 		break
 
 
