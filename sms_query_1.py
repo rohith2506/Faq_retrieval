@@ -10,8 +10,10 @@ import string
 import os
 import sys
 from collections import defaultdict
+from nltk.corpus import wordnet as wn
 phi = 1
 sms_dictionary = {}
+mean_reciprocal_rank = 0
 eng_faq = defaultdict(list)
 sms_vowels = ["a","e","i","o"]
 numbers = {1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",9:"nine",0:"zero"}
@@ -38,6 +40,141 @@ def check_in_corpus(word):
 			wrd = sms_dictionary[k]
 			return wrd[0:len(wrd)-1]
 	return None
+
+
+def unigram_match(sms_query,faq_query):
+	sms_words = sms_query.split()
+	faq_words = faq_query.split()
+
+	total_sms_length = len(sms_words)
+	sms_length = 0
+
+	faq_synonyms = []
+	for word2 in faq_words:
+		for ss in wn.synsets(word2)
+			ws_list = ss.lemma_names
+			for wd in ws_list:
+				if wd not in faq_synonyms:
+					faq_synonyms.append(wd)
+
+	for word1 in sms_words:
+		flag = 0
+		for word2 in faq_words:
+			if word2 == word1:
+				sms_length  = sms_length + 1
+				flag = 1
+				break
+
+		if flag == 0:
+			flag2 = 0
+			sms_synonyms = []
+			for ss in wn.synsets(word1):
+				ws_list = ss.lemma_names
+				for wd in ws_list:
+					if wd not in sms_synonyms:
+						sms_synonyms.append(wd)
+
+			for w1 in sms_synonyms:
+				for w2 in faq_synonyms:
+					if w2 == w1:
+						flag2 = 1
+						break
+				if flag2 == 1:
+					break
+
+			if flag2 == 1:
+				sms_length = sms_length + 1	
+
+	return sms_length / total_sms_length
+
+
+def bigram_match(sms_query,faq_query):
+	sms_words_1 = sms_query.split()
+	faq_words_1 = faq_query.split()
+
+	sms_words = []
+	for i in range(0,len(sms_words_1)-1):
+		temp_str = sms_words_1[i] + " " + sms_words_1[i+1]
+		sms_words.append(temp_str)
+
+	faq_words = []
+	for i in range(0,len(faq_words_1)-1):
+		temp_str = faq_words_1[i] + " " + faq_words_1[i+1]
+		faq_words.append(temp_str)
+
+	total_sms_length = len(sms_words)
+	sms_length = 0
+
+	for word1 in sms_words:
+		flag = 0
+		for word2 in faq_words:
+			if word1 == word2:
+				flag = 1
+				sms_length = sms_length + 1
+				break
+
+		if flag == 0:
+			flag2 = 0
+			sms_bigram_list = []
+			faq_bigram_list = []
+
+			synonyms_word1 = []
+			for ss in wn.synsets(sms_words_1[0]):
+					ws_list = ss.lemma_names
+					for wd in ws_list:
+						if wd not in synonyms_word1:
+							synonyms_word1.append(wd)
+
+			for i in range(1,len(sms_words_1)):
+				synonyms_word2 = []
+				for ss in wn.synsets(sms_words_1[i+1]):
+					ws_list = ss.lemma_names
+					for wd in ws_list:
+						if wd not in synonyms_word2:
+							synonyms_word2.append(wd)
+				
+				for j in range(0,len(synonyms_word1)):
+					for k in range(0,len(synonyms_word2)):
+						temp_str = synonyms_word1[j] + " " + synonyms_word2[k]
+						if temp_str not in sms_bigram_list:
+							sms_bigram_list.append(temp_str)
+
+				synonyms_word1 = synonyms_word2
+
+			synonyms_word1 = []
+			for ss in wn.synsets(faq_words_1[0]):
+					ws_list = ss.lemma_names
+					for wd in ws_list:
+						if wd not in synonyms_word1:
+							synonyms_word1.append(wd)
+
+			for i in range(1,len(faq_words_1)):
+				synonyms_word2 = []
+				for ss in wn.synsets(faq_words_1[i+1]):
+					ws_list = ss.lemma_names
+					for wd in ws_list:
+						if wd not in synonyms_word2:
+							synonyms_word2.append(wd)
+				
+				for j in range(0,len(synonyms_word1)):
+					for k in range(0,len(synonyms_word2)):
+						temp_str = synonyms_word1[j] + " " + synonyms_word2[k]
+						if temp_str not in faq_bigram_list:
+							faq_bigram_list.append(temp_str)
+
+				synonyms_word1 = synonyms_word2
+
+			for w1 in sms_bigram_list:
+				for w2 in faq_bigram_list:
+					if w1 == w2:
+						flag2 = 1
+				if flag2 == 1:
+					break
+			
+			if flag2 == 1:
+				sms_length = sms_length + 1
+
+	return total_sms_length/sms_length				
 
 class input_from_xml():
 	# fetch questions input from eng.xml
@@ -142,10 +279,10 @@ class input_from_xml():
 					question = root[i][j].text	
 			data.append((domain,question))
 
-		print data[0:10]
+#		print data[0:10]
 		for domain,question in data:
 			eng_faq[domain].append(question)
-		print eng_faq['ENG_CAREER']
+		print eng_faq['ENG_CAREER'][0:10]
 		return eng_faq
 
 def min(a,b,c):
@@ -259,12 +396,13 @@ if __name__=="__main__":
 	sms_queries = c.fetch_sms_queries()
 	preprocess_sms_dictionary()
 	c.build_eng_faq_dictionary()
+#	sys.exit(1)
 #	for k,v in sms_dictionary.items():
 #		print k,sms_dictionary[k]
 	
 	print len(sms_dictionary)
 
-	for domain,query,indomain in sms_queries[0:4]:
+	for domain,query,indomain in sms_queries[0:5]:
 		pruned_word_list = []
 		for ch in string.punctuation:
 			if ch!= '#':
@@ -294,7 +432,33 @@ if __name__=="__main__":
 			cleaned_sms_sentence = cleaned_sms_sentence + pruned_word_list[i][0]
 			cleaned_sms_sentence = cleaned_sms_sentence + " "
 
-		# English faq has been constructed 
+		# English faq has been constructed
+		faq_list = []
+		if indomain == 1:
+			faq_list = eng_faq[domain]
+		else:
+			for domain,question in eng_faq.items():
+				temp_list_1 = eng_faq[domain]
+				for l in temp_list_1:
+					faq_list.append(l)
+
+		scores = {}
+		for quest in faq_list:
+			unigram_score = unigram_match(cleaned_sms_sentence,quest)
+			bigram_score  = bigram_match(cleaned_sms_sentence,quest)
+			sms_query_score = (unigram_score * bigram_score) /(unigram_score + bigram_score)
+			scores[quest] = sms_query_score
+
+
+		top_questions = sorted(scores, key=scores.__getitem__)
+		top_questions = top_questions[::-1]
+		top_questions = top_questions[0:5]
+		reciprocal_rank = retreive_rank(top_questions,faq_list)
+		mean_reciprocal_rank = mean_reciprocal_rank + reciprocal_rank
+
+
+
+
 		
 
 
