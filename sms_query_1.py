@@ -9,6 +9,7 @@ import logging
 import string
 import os
 import sys
+import time
 from collections import defaultdict
 from nltk.corpus import wordnet as wn
 phi = 1
@@ -43,15 +44,31 @@ def check_in_corpus(word):
 
 
 def unigram_match(sms_query,faq_query):
+
+	for ch in string.punctuation:
+		if ch!= '#':
+			faq_query = faq_query.replace(ch,"")
+
 	sms_words = sms_query.split()
 	faq_words = faq_query.split()
+
+	for i in range(0,len(sms_words)):
+		sms_words[i] = sms_words[i].lower()
+
+	for i in range(0,len(faq_words)):
+		faq_words[i] = faq_words[i].lower()
+
+	print "unigram matching"
+
+	print sms_words
+	print faq_words
 
 	total_sms_length = len(sms_words)
 	sms_length = 0
 
 	faq_synonyms = []
 	for word2 in faq_words:
-		for ss in wn.synsets(word2)
+		for ss in wn.synsets(word2):
 			ws_list = ss.lemma_names
 			for wd in ws_list:
 				if wd not in faq_synonyms:
@@ -85,12 +102,24 @@ def unigram_match(sms_query,faq_query):
 			if flag2 == 1:
 				sms_length = sms_length + 1	
 
-	return sms_length / total_sms_length
+	print sms_length, total_sms_length , sms_length / (total_sms_length*1.0)
+	time.sleep(10)
+	return sms_length / (total_sms_length*1.0)
 
 
 def bigram_match(sms_query,faq_query):
+	for ch in string.punctuation:
+		if ch!= '#':
+			faq_query = faq_query.replace(ch,"")
+
 	sms_words_1 = sms_query.split()
 	faq_words_1 = faq_query.split()
+
+	for i in range(0,len(sms_words_1)):
+		sms_words_1[i] = sms_words_1[i].lower()
+
+	for i in range(0,len(faq_words_1)):
+		faq_words_1[i] = faq_words_1[i].lower()
 
 	sms_words = []
 	for i in range(0,len(sms_words_1)-1):
@@ -102,6 +131,11 @@ def bigram_match(sms_query,faq_query):
 		temp_str = faq_words_1[i] + " " + faq_words_1[i+1]
 		faq_words.append(temp_str)
 
+	print "bigram matching"
+
+	print sms_words
+	print faq_words
+
 	total_sms_length = len(sms_words)
 	sms_length = 0
 
@@ -110,6 +144,7 @@ def bigram_match(sms_query,faq_query):
 		for word2 in faq_words:
 			if word1 == word2:
 				flag = 1
+				print  word1,"iam here"
 				sms_length = sms_length + 1
 				break
 
@@ -127,7 +162,7 @@ def bigram_match(sms_query,faq_query):
 
 			for i in range(1,len(sms_words_1)):
 				synonyms_word2 = []
-				for ss in wn.synsets(sms_words_1[i+1]):
+				for ss in wn.synsets(sms_words_1[i]):
 					ws_list = ss.lemma_names
 					for wd in ws_list:
 						if wd not in synonyms_word2:
@@ -150,7 +185,7 @@ def bigram_match(sms_query,faq_query):
 
 			for i in range(1,len(faq_words_1)):
 				synonyms_word2 = []
-				for ss in wn.synsets(faq_words_1[i+1]):
+				for ss in wn.synsets(faq_words_1[i]):
 					ws_list = ss.lemma_names
 					for wd in ws_list:
 						if wd not in synonyms_word2:
@@ -164,17 +199,25 @@ def bigram_match(sms_query,faq_query):
 
 				synonyms_word1 = synonyms_word2
 
+			print "bigrams list matched"
+			print sms_bigram_list,faq_bigram_list
+
 			for w1 in sms_bigram_list:
 				for w2 in faq_bigram_list:
+					print "wordws matched",w1,w2
+					time.sleep(15)
 					if w1 == w2:
 						flag2 = 1
 				if flag2 == 1:
 					break
 			
 			if flag2 == 1:
+				print "iam here too"
 				sms_length = sms_length + 1
 
-	return total_sms_length/sms_length				
+	print sms_length,total_sms_length,(sms_length/(total_sms_length*1.0))
+	return sms_length / (total_sms_length*1.0)	
+
 
 class input_from_xml():
 	# fetch questions input from eng.xml
@@ -279,7 +322,7 @@ class input_from_xml():
 					wrd = wrd[0:index]
 					if wrd not in domains:
 						domains.append(wrd)
-		print domains
+#		print domains
 		data = []
 		for i in range(0,len(root)):
 			domain = ""
@@ -300,7 +343,7 @@ class input_from_xml():
 #		print data[0:10]
 		for domain,question in data:
 			eng_faq[domain].append(question)
-		print eng_faq['ENG_CAREER'][0:10]
+#		print eng_faq['ENG_CAREER'][0:10]
 		return eng_faq
 
 def min(a,b,c):
@@ -418,7 +461,7 @@ if __name__=="__main__":
 #	for k,v in sms_dictionary.items():
 #		print k,sms_dictionary[k]
 	
-	print len(sms_dictionary)
+#	print len(sms_dictionary)
 
 	for domain,query,indomain in sms_queries[0:5]:
 		pruned_word_list = []
@@ -450,6 +493,7 @@ if __name__=="__main__":
 			cleaned_sms_sentence = cleaned_sms_sentence + pruned_word_list[i][0]
 			cleaned_sms_sentence = cleaned_sms_sentence + " "
 
+		print cleaned_sms_sentence
 		# English faq has been constructed
 		faq_list = []
 		if indomain == 1:
@@ -461,16 +505,23 @@ if __name__=="__main__":
 					faq_list.append(l)
 
 		scores = {}
+		print "Matching with questions:"
 		for quest in faq_list:
 			unigram_score = unigram_match(cleaned_sms_sentence,quest)
 			bigram_score  = bigram_match(cleaned_sms_sentence,quest)
-			sms_query_score = (unigram_score * bigram_score) /(unigram_score + bigram_score)
+			sms_query_score = 0.0
+			if (unigram_score + bigram_score)!=0:
+				sms_query_score = (unigram_score * bigram_score) /((unigram_score + bigram_score)*(1.0))
+			print quest,unigram_score,bigram_score,sms_query_score
+			time.sleep(30)
 			scores[quest] = sms_query_score
 
 
 		top_questions = sorted(scores, key=scores.__getitem__)
 		top_questions = top_questions[::-1]
 		top_questions = top_questions[0:5]
+
+		print top_questions
 
 		if indomain == 1:
 			sms_query_id  = c.check_in_sms_xml(query)
@@ -485,5 +536,5 @@ if __name__=="__main__":
 			reciprocal_rank = 0
 			if index != 0:
 				reciprocal_rank = 1/index
-			print "reciprocal rank for query: %d", %(reciprocal_rank) 
+			print 'reciprocal rank for query: %d'  %(reciprocal_rank) 
 			mean_reciprocal_rank = mean_reciprocal_rank + reciprocal_rank
