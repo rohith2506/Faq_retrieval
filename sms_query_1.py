@@ -103,7 +103,6 @@ def unigram_match(sms_query,faq_query):
 				sms_length = sms_length + 1	
 
 	print sms_length, total_sms_length , sms_length / (total_sms_length*1.0)
-	time.sleep(10)
 	return sms_length / (total_sms_length*1.0)
 
 
@@ -139,85 +138,88 @@ def bigram_match(sms_query,faq_query):
 	total_sms_length = len(sms_words)
 	sms_length = 0
 
-	for word1 in sms_words:
+	faq_bigram_list = []
+	synonyms_word1 = []
+
+	for ss in wn.synsets(faq_words_1[0]):
+			ws_list = ss.lemma_names
+			for wd in ws_list:
+				if wd not in synonyms_word1:
+					synonyms_word1.append(wd)
+
+	for j in range(1,len(faq_words_1)):
+		synonyms_word2 = []
+		for ss in wn.synsets(faq_words_1[i]):
+			ws_list = ss.lemma_names
+			for wd in ws_list:
+				if wd not in synonyms_word2:
+					synonyms_word2.append(wd)
+	
+		for j in range(0,len(synonyms_word1)):
+			for k in range(0,len(synonyms_word2)):
+				temp_str = synonyms_word1[j] + " " + synonyms_word2[k]
+				if temp_str not in faq_bigram_list:
+					faq_bigram_list.append(temp_str)
+
+		synonyms_word1 = synonyms_word2
+
+
+	for i in range(0 ,len(sms_words)):
 		flag = 0
-		for word2 in faq_words:
-			if word1 == word2:
+		for j in range(0,len(faq_words)):
+			if sms_words[i] == faq_words[j]:
 				flag = 1
-				print  word1,"iam here"
+	#			print  sms_words[i],"iam here"
 				sms_length = sms_length + 1
 				break
 
 		if flag == 0:
 			flag2 = 0
 			sms_bigram_list = []
-			faq_bigram_list = []
+
+	#		print "words to be matched"
+	#		print sms_words_1[i], sms_words_1[i+1]
 
 			synonyms_word1 = []
-			for ss in wn.synsets(sms_words_1[0]):
-					ws_list = ss.lemma_names
-					for wd in ws_list:
-						if wd not in synonyms_word1:
-							synonyms_word1.append(wd)
+			for ss in wn.synsets(sms_words_1[i]):
+				ws_list = ss.lemma_names
+				for wd in ws_list:
+					if wd not in synonyms_word1:
+						synonyms_word1.append(wd)
 
-			for i in range(1,len(sms_words_1)):
-				synonyms_word2 = []
-				for ss in wn.synsets(sms_words_1[i]):
-					ws_list = ss.lemma_names
-					for wd in ws_list:
-						if wd not in synonyms_word2:
-							synonyms_word2.append(wd)
+			synonyms_word2 = []
+			for ss in wn.synsets(sms_words_1[i+1]):
+				ws_list = ss.lemma_names
+				for wd in ws_list:
+					if wd not in synonyms_word2:
+						synonyms_word2.append(wd)
 				
-				for j in range(0,len(synonyms_word1)):
-					for k in range(0,len(synonyms_word2)):
-						temp_str = synonyms_word1[j] + " " + synonyms_word2[k]
-						if temp_str not in sms_bigram_list:
-							sms_bigram_list.append(temp_str)
+			for j in range(0,len(synonyms_word1)):
+				for k in range(0,len(synonyms_word2)):
+					temp_str = synonyms_word1[j] + " " + synonyms_word2[k]
+					if temp_str not in sms_bigram_list:
+						sms_bigram_list.append(temp_str)
 
-				synonyms_word1 = synonyms_word2
+	#		print "bigrams list matched"
+	#		print sms_bigram_list,faq_bigram_list
 
-			synonyms_word1 = []
-			for ss in wn.synsets(faq_words_1[0]):
-					ws_list = ss.lemma_names
-					for wd in ws_list:
-						if wd not in synonyms_word1:
-							synonyms_word1.append(wd)
-
-			for i in range(1,len(faq_words_1)):
-				synonyms_word2 = []
-				for ss in wn.synsets(faq_words_1[i]):
-					ws_list = ss.lemma_names
-					for wd in ws_list:
-						if wd not in synonyms_word2:
-							synonyms_word2.append(wd)
-				
-				for j in range(0,len(synonyms_word1)):
-					for k in range(0,len(synonyms_word2)):
-						temp_str = synonyms_word1[j] + " " + synonyms_word2[k]
-						if temp_str not in faq_bigram_list:
-							faq_bigram_list.append(temp_str)
-
-				synonyms_word1 = synonyms_word2
-
-			print "bigrams list matched"
-			print sms_bigram_list,faq_bigram_list
+	#		time.sleep(5)
 
 			for w1 in sms_bigram_list:
 				for w2 in faq_bigram_list:
-					print "wordws matched",w1,w2
-					time.sleep(15)
+	#				print "wordws matched",w1,w2
+	#				time.sleep(15)
 					if w1 == w2:
 						flag2 = 1
 				if flag2 == 1:
 					break
 			
 			if flag2 == 1:
-				print "iam here too"
+	#			print "iam here too"
 				sms_length = sms_length + 1
 
 	print sms_length,total_sms_length,(sms_length/(total_sms_length*1.0))
 	return sms_length / (total_sms_length*1.0)	
-
 
 class input_from_xml():
 	# fetch questions input from eng.xml
@@ -513,7 +515,6 @@ if __name__=="__main__":
 			if (unigram_score + bigram_score)!=0:
 				sms_query_score = (unigram_score * bigram_score) /((unigram_score + bigram_score)*(1.0))
 			print quest,unigram_score,bigram_score,sms_query_score
-			time.sleep(30)
 			scores[quest] = sms_query_score
 
 
@@ -522,6 +523,7 @@ if __name__=="__main__":
 		top_questions = top_questions[0:5]
 
 		print top_questions
+		time.sleep(30)
 
 		if indomain == 1:
 			sms_query_id  = c.check_in_sms_xml(query)
