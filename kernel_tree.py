@@ -1,7 +1,3 @@
-'''
-Parse the Xml and retrrieve XMl
-@Author: Rohit
-'''
 import math
 import os
 from xml.dom import minidom
