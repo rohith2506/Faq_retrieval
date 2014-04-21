@@ -1,8 +1,3 @@
-'''
-SVM classification using TF-IDF features of documents
-@Author: Rohit
-'''
-
 import logging
 import numpy as np
 from optparse import OptionParser
@@ -202,9 +197,17 @@ def main_function():
   scores = clf.decision_function(X_test)
   test_time = time() - t0
   print("test time:  %0.3fs" % test_time)
-  return X_test, pred, y_test, scores
+#  print scores[0]
+  return test_data, pred, y_test, scores, train_target_names
 
 '''
+  for i in range(0,10):
+      print "quest: ",test_data[i]
+      print "Given class: %s" %(train_target_names[y_test[i]])
+      print "Predicted class: %s" %(train_target_names[pred[i]]) 
+      print "#####################"
+
+
 #  to calculate efficiency
   cnt = 0
   cnt2 = 0
@@ -213,10 +216,10 @@ def main_function():
       if pred[i] == y_test[i]:
         cnt = cnt + 1
       cnt2 = cnt2 + 1
+
+  print cnt,cnt2
+  print "efficiency of classification is: %f" %((cnt + len(y_test) - cnt2)/(1.0*len(y_test))*100)
 '''
 
-'''
-Helper Function
 if __name__ == "__main__":
   main_function()
-'''

@@ -224,7 +224,7 @@ def bigram_match(sms_query,faq_query):
 class input_from_xml():
 	# fetch questions input from eng.xml
 	def fetch_input_from_xml_questions(self):
-		tree = ET.parse("/home/rohit/Dropbox/Project/Faq/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/FAQs/English/eng.xml")
+		tree = ET.parse("/home/rohspeed/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/FAQs/English/eng.xml")
 		root = tree.getroot()
 		# Get questions from mono_training_data
 		questions = defaultdict(list)
@@ -239,12 +239,15 @@ class input_from_xml():
 					question = root[i][j].text
 			data.append((domain,question))
 
+		domains = []
 		for domain,question in data:
 			questions[domain].append(question)
-		return questions
+			if domain not in domains:
+				domains.append(domain)
+		return domains,questions
 
 	def check_in_sms_xml(self,query):
-		tree = ET.parse("/home/rohit/Dropbox/Project/Faq/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/SMS_Queries/Monolingual Task/English/_ENG_2013_MONO_TRAINING_DATA.xml")
+		tree = ET.parse("/home/rohspeed/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/SMS_Queries/Monolingual Task/English/_ENG_2013_MONO_TRAINING_DATA.xml")
 		root = tree.getroot()
 
 		for i in range(0,len(root)):
@@ -253,7 +256,7 @@ class input_from_xml():
 
 
 	def check_in_faq_xml(self,query):
-		tree = ET.parse("/home/rohit/Dropbox/Project/Faq/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/FAQs/English/eng.xml")
+		tree = ET.parse("/home/rohspeed/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/FAQs/English/eng.xml")
 		root = tree.getroot()
 
 		for i in range(0,len(root)):
@@ -277,7 +280,7 @@ class input_from_xml():
 		return dictionary
 
 	def fetch_sms_queries(self):
-		tree = ET.parse("/home/rohit/Dropbox/Project/Faq/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/SMS_Queries/Monolingual Task/English/_ENG_2013_MONO_TRAINING_DATA.xml")
+		tree = ET.parse("/home/rohspeed/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/SMS_Queries/Monolingual Task/English/_ENG_2013_MONO_TRAINING_DATA.xml")
 		root = tree.getroot()
 		# Get sms questions from mono_training_data
 		questions = []
@@ -309,7 +312,7 @@ class input_from_xml():
 		return questions
 
 	def build_eng_faq_dictionary(self):
-		tree = ET.parse("/home/rohit/Dropbox/Project/Faq/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/FAQs/English/eng.xml")
+		tree = ET.parse("/home/rohspeed/Faq_retrieval/FIRE_TRAINING_DATA/FIRE2013_TRAINING_DATA/FAQs/English/eng.xml")
 		root = tree.getroot()		
 		domains = []
 		for i in range(0,len(root)):
@@ -451,8 +454,11 @@ def similarity_measure(word,dictionary):
 
 if __name__=="__main__":
 	c = input_from_xml()
-	questions = c.fetch_input_from_xml_questions()
+	domains,questions = c.fetch_input_from_xml_questions()
 	dictionary = c.build_dictionary(questions)
+	fname = open("output.txt","rw+")
+	fname.seek(0,0)
+	fname.write("Hello\n")
 #	print len(dictionary)
 	dictionary.sort()
 #	print dictionary[10000:10500]
@@ -465,13 +471,18 @@ if __name__=="__main__":
 	
 #	print len(sms_dictionary)
 
-	for domain,query,indomain in sms_queries[0:5]:
+	mean_reciprocal_rank = 0.0
+	
+	for domain,query,indomain in sms_queries[0:10]:
 		pruned_word_list = []
 		for ch in string.punctuation:
 			if ch!= '#':
 				query = query.replace(ch,"")
-		print query
+		print "Query is:",query
+		fname.write("GIVEN QUERY:\n")
+		fname.write(query+"\n"+"\n"+"\n")
 		sms_query_words = query.split(" ")
+
 		for i in range(0,len(sms_query_words)):
 			print sms_query_words[i]
 			sms_query_words[i] = sms_query_words[i].lower()
@@ -487,15 +498,20 @@ if __name__=="__main__":
 					wrdlist.append(sms_query_words[i])
 				pruned_word_list.append(wrdlist)
 
+
 		for i in range(0,len(pruned_word_list)):
 			print sms_query_words[i],pruned_word_list[i]
 
+		time.sleep(10)
 		cleaned_sms_sentence = ""
 		for i in range(0,len(pruned_word_list)):
 			cleaned_sms_sentence = cleaned_sms_sentence + pruned_word_list[i][0]
 			cleaned_sms_sentence = cleaned_sms_sentence + " "
 
+
 		print cleaned_sms_sentence
+		fname.write("CLEANED SMS QUERY:\n")
+		fname.write(cleaned_sms_sentence+"\n"+"\n"+"\n")
 		# English faq has been constructed
 		faq_list = []
 		if indomain == 1:
@@ -522,7 +538,10 @@ if __name__=="__main__":
 		top_questions = top_questions[::-1]
 		top_questions = top_questions[0:5]
 
-		print top_questions
+		fname.write("TOP MATCHES FOR GIVEN SMS QUERY:\n")
+		for i in range(0,len(top_questions)):
+			print top_questions[i]
+			fname.write(top_questions[i]+"\n")
 		time.sleep(30)
 
 		if indomain == 1:
@@ -535,8 +554,13 @@ if __name__=="__main__":
 				if faq_query_ids[i] == sms_query_id:
 					index = i+1
 					break
-			reciprocal_rank = 0
+			reciprocal_rank = 0.0
 			if index != 0:
-				reciprocal_rank = 1/index
-			print 'reciprocal rank for query: %d'  %(reciprocal_rank) 
+				reciprocal_rank = 1/1.0*index
+			print 'reciprocal rank for query: %f'  %(reciprocal_rank)
+			fname.write("RECIPROCAL RANk FOR GIVEN QUERY: %f\n" %(reciprocal_rank)) 
 			mean_reciprocal_rank = mean_reciprocal_rank + reciprocal_rank
+
+	print "Mean reciprocal_rank is %f" %(mean_reciprocal_rank)
+	fname.write("\n\n\n\n\n\n")
+	fname.write(mean_reciprocal_rank+"\n")

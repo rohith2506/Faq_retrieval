@@ -6,88 +6,126 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <sstream>
 #include <queue>
 using namespace std;
 const int lambda = 0.5;
 const int mu = 0.5;
 
+struct node{
+	string str;
+	int size;
+	int depth;
+	int label;
+	bool terminal;
+	vector<int> indexes;
+	vector<node *> child;
+}*root;    
+
 class form_tree{
-private:
-	struct node{
-		string str;
-		int size;
-		int depth;
-		int label;
-		bool terminal;
-		vector<int> indexes;
-		vector<node *> child;
-	}*root;
 public:
-	form_tree();
-	void main_func();
+	node* main_func(string str);
+	void main_function(string parse_quest);
+	void depth(node *t ,int dpt);
+	int size(node *t);
+	void size1(node *t);
+	void level_order(node *t);
+	void assign_child(node *t);
+	int total_fragments(node *t);
+	node* get(node *t,int pos);
+	void delta(string str);
+	void calculate(node *t1,node *t2);
 };
 
 
-node *form_tree::main_func(string str){
+node* form_tree::main_func(string str){
 	stack<node *> stk;
 	node *temp = new node;
-	temp.str = str[0];
-	temp.child = NULL;
+	stringstream ss;
+	ss << str[0];
+ 	ss >> temp->str;
 	stk.push(temp);
 	string str2 = ""; 
-
-//	(ROOT (SBARQ (WHNP (WP Who)) 
-//		(SQ (VP (VBZ needs) (NP (NP (DT a) (NN visa)) (PP (IN for) (NP (NNP Australia)))))) (. ?)))
 	
+	cout << str << endl;
+	cout << stk.top() -> str << endl;
 	for(int i=1;i<str.length();i++){
-		if(str[i] == ')' || str[i] == '('){
+	if(stk.size() == 10){
+			cout << "iam herh";
+			while(!stk.empty()){
+				node * temp5 = stk.top();
+				cout << temp5 -> str << endl;
+				stk.pop();
+			}
+		}
+
+	if(str[i] == ')' || str[i] == '('){
 			if(str[i] == ')'){
-				vector<node *> children;
+				if(str2 != ""){
+					node *temp4 = new node;
+					temp4 -> str = str2;
+					temp4->size = 0;
+					temp4->label = -1;
+					temp4->depth = 0;
+					temp4->terminal = false;
+					str2 = "";
+					stk.push(temp4);
+				}
+
+				cout << "after I" << endl;
+ 				vector<node *> children;
+
 				while(!stk.empty()){
-					node *temp = stk.top();
+					node *temp5 = stk.top();
+					cout << "top of the stack: " << temp5->str << endl;
 					stk.pop();
-					if(temp.str == '(')
-						break
+					if(temp5->str == "("){
+						cout << "ima";
+						break;
+					}
 					else
-						children.push_back(temp);
+						children.push_back(temp5);
 				}
 				node *temp3;
-				int sz = children.length()-1;
+				int sz = children.size()-1;
+				cout << sz << endl;
 				temp3 -> str = children[sz]->str;
-				for(int j=0;j<children.length()-1;j++)
+				for(int j=0;j<children.size()-1;j++)
 					temp3 -> child.push_back(children[j]);
 				temp3->size = 0;
 				temp3->label = -1;
 				temp3->depth = 0;
 				temp3->terminal = false;
-				temp3->arr = NULL;
 				stk.push(temp3);
 			}
 			else{
 				node *temp2;
-				temp2->str = str[i];
-				temp2->child = NULL;
+				stringstream ss2;
+				ss2 << str[i]; 
+				ss2 >> temp2->str;
+				cout << "in open: "<< temp2 -> str << endl;
 				temp2->size = 0;
 				temp2->label = -1;
 				temp2->depth = 0;
 				temp2->terminal = false;
-				temp2->arr = NULL;
 				stk.push(temp2);
+				cout << "stack top: " << stk.top() -> str << endl;
 			}
 		}
 		else{
-			if(str[i] != ' ')
+			if(str[i] != ' '){
 				str2 = str2 + str[i];
+				cout << "string was: " << str2 << endl;
+			}
 			else{
 				node *temp2;
-				temp2.str = str2;
-				temp2.child = NULL;
+				temp2 -> str = str2;
 				temp2->size = 0;
 				temp2->label = -1;
 				temp2->depth = 0;
 				temp2->terminal = false;
-				temp2->arr = NULL;
 				stk.push(temp2);
+				cout << stk.top() -> str << endl;
 				str2 = "";
 			}
 		}
@@ -96,6 +134,12 @@ node *form_tree::main_func(string str){
 	return t1;
 }
 
+
+void form_tree::main_function(string parse_quest){
+	node *t = new node();
+	t=main_func(parse_quest);
+}
+/*
 // to assign size and depth for each node
 
 void form_tree::depth(node *t,int dpt){
@@ -150,10 +194,10 @@ void form_tree::assign_child(node *t){
 	}
 }
 
-/*
-Main part comes here
-calculating M(r1,r2)
-*/
+
+//Main part comes here
+//calculating M(r1,r2)
+
 
 int form_tree::total_fragments(node *t){
 	queue<node *> q;
@@ -239,8 +283,46 @@ void form_tree::calculate(node *t1,node *t2){
 	return main_result;
 }
 
+*/
+
 int main(int argc,char *argv[]){
-	depth(t,1);
-	t -> size = size(t);
-	size1(t);
+	zmq::context_t context (1);
+	zmq::socket_t socket (context, ZMQ_REP);
+	socket.bind ("tcp://127.0.0.1:5000");
+	form_tree obj;
+	string parse_quest = "(ROOT (S (S (NP (PRP I)) (VP (VBP am) (NP (NNP CA)))) (, ,) (NP (PRP I)) (VP (VBP wan) (S (VP (TO na) (VP (VB do) (NP (DT any) (NN rcgnzd) (NN course)) (PP (IN for) (S (VP (VBG entering) (PP (IN in) (NP (NN share) (NN market)))))))))) (. .)))";
+	obj.main_function(parse_quest);
+/*
+	while (true) {
+		cout<<"iam here"<<endl;
+        zmq::message_t request,request2;
+        socket.recv (&request);
+        cout <<"iam here tweoooo"<<endl;
+		char *num = (char *) request.data();
+        string parse_quest = "";
+
+        int i;
+       	for(i=0;i<strlen(num);i++){
+        	if(num[i] == '\n')
+        		break;
+        	parse_quest = parse_quest + num[i];
+        }
+        cout << parse_quest << endl;
+
+        vector<int> train_quest;
+        int val = 0;
+        for(int j=i;j<strlen(num);j++){
+        	if(num[j] == '$'){
+        		train_quest.push_back(val);
+        		val = 0;
+        	}
+        	else
+        		val = val * 10 + (int)(num[j] - '0');
+        }
+        cout << train_quest.size() << endl;
+        obj.main_function(parse_quest);
+        sleep (1000);
+    }
+    return 0;
+*/
 }
