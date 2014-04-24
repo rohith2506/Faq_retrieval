@@ -60,6 +60,7 @@ class extract_data():
       return test_data,test_target
 
 
+
 def main_function():
   # Display progress logs on stdout
   logging.basicConfig(level=logging.INFO,
@@ -185,11 +186,12 @@ def main_function():
       feature_names = np.asarray(vectorizer.get_feature_names())
 
   loop = 1
+  C= 1.0
   while True:
     print('_' * 80)
     print("Training the data: ")
     t0 = time()
-    clf = LinearSVC()
+    clf = LinearSVC(C=C)
     clf.fit(X_train,y_train)
     train_time = time() - t0
     print("train time: %0.3fs" % train_time)
@@ -205,12 +207,6 @@ def main_function():
     X_train = vectorizer.transform(train_data)
     y_train = train_target
 
-    for i in range(0,10):
-        print "quest: ",test_data[i]
-        print "Given class: %s" %(train_target_names[y_test[i]])
-        print "Predicted class: %s" %(train_target_names[pred[i]]) 
-        print "#####################"
-
     cnt = 0
     cnt2 = 0
     for i in range(0,len(y_test)):
@@ -221,6 +217,15 @@ def main_function():
 
     print cnt,cnt2
     print "efficiency of classification in loop %d is: %f" %(loop,(cnt + len(y_test) - cnt2)/(1.0*len(y_test))*100)
+
+
+    '''
+    for i in range(0,10):
+        print "quest: ",test_data[i]
+        print "Given class: %s" %(train_target_names[y_test[i]])
+        print "Predicted class: %s" %(train_target_names[pred[i]]) 
+        print "#####################"
+    '''
     loop = loop + 1
 
 if __name__ == "__main__":

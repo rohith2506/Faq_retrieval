@@ -1,36 +1,59 @@
-GIVEN QUERY:
-I am CA I wanna do any rcgnzd course for entering in share market
+None
+Usage: svm_test.py [options]
 
-
-CLEANED SMS QUERY:
-i am ca i wanna do any recognized course for entering in share market 
-
-
-TOP MATCHES FOR GIVEN SMS QUERY:
-I am CA, I want do any recognized course for entering in share market.
-Dear Sir
-I am an Graduate Electronic engineer with around 07 year experience in maintenance field, currently working with a reputed concern. I am crazy about the IT and desperately want to switch over in software field. I did Visual Basic and MSAccess 1.5 year back, but I could not do any project. But I am confident that if given, I can successfully execute any project. These days I am inclined towards the web development. Kindly guide me what should I do to achieve my goal of entering in IT industry? How is the scope of internet programming and what are job opportunities in this line? Would I be able to get in as an fresher and what would be starting salary, if I enter in IT industry now?
-Hello Sir, I am graduate and I want to make my CAREER in Share Market i.e. Terminal Operator through Broker of National Stock Exchange. So, suggest me the what can it do?
-I am in 12 std. My problem is that I am very weak in studies. Firstly I had to take maths because my parents wanted me to. I could not handle the subject properly and the result was that I failed miserably with marks which I wont even like to describe. My condition has become so bad that I was "pushed" to XII std. I was not like that till X. I obtained 70% in X boards. now again this is my board class and I want to give my best. I have joined coaching classes unlike last year. Simantaneously I have to prepare for PET for engg. admission. My problem is that however hard I try I am not able to show that I can also get good marks, like I had my physics test recently, I tried to give my best. Read the theory at leats 3 times, took self tests, made short notes everything. But it didn't do any good. Please tell me how should I study what should be my strategy so that I can obtain good marks and obtain the lost reputation of a good student and get selected in PET with a good rank and do very well in boards. please help me!
-Dear Sir/Madam, 
-I am an Electrical Engineer (B.E.)with 9 years of Operational (Both Maintenance and Production) experience in a reputed Telephone Cable Industry. As the future of Telephone Cable is going to be bleak. Even our Superiors have advised to keep an option open for the remaining part of the life. Kindly, advise me for the future, viewing the present/ future scenario of job. I am 35 years old. Will the pursuance of ERP Course will land me a good job? If so, Pl., advise the leading Institute (providing training cum placement) I have also done short term industrial automation course for the value addition in the present experience. But presently its demand is not so encouraging. 
-With regards and eagerly awaiting ur reply,
-MRR FOR GIVEN QUERY: 1
-
-
-###################################################################################
-
-GIVEN QUERY:
-Bloody Mary orig called
-
-
-CLEANED SMS QUERY:
-bloody mary org called 
-
-
-TOP MATCHES FOR GIVEN SMS QUERY:
-What was the drink we know as the Bloody Mary originally called?
-What spa town headquartered the French who collaborated with the Nazis in World War II?
-Why was Minimum Temperature Forecast season allowed to be completed in the southern states, while terminated in the northern agricultural districts?
-Is umeshyadavplay any international cricket?
-Do organic farmers ever use pesticides?
+Options:
+  -h, --help            show this help message and exit
+  --report              Print a detailed classification report.
+  --chi2_select=SELECT_CHI2
+                        Select some number of features using a chi-squared
+                        test
+  --confusion_matrix    Print the confusion matrix.
+  --top10               Print ten most discriminative terms per class for
+                        every classifier.
+  --all_categories      Whether to use all categories or not.
+  --use_hashing         Use a hashing vectorizer.
+  --n_features=N_FEATURES
+                        n_features when using the hashing vectorizer.
+  --filtered            Remove newsgroup information that is easily overfit:
+                        headers, signatures, and quoting.
+()
+Loading Data from different categories....
+['ENG_AGRICULTURE', 'CAREER', 'ENG_CAREER', 'GK', 'ENG_HEALTH', 'INSURANCE', 'ENG_INSURANCE', 'INDIAN_RAILWAYS', 'ENG_SPORTS', 'TELECOMMUNICATION', 'ENG_TOURISM', 'BANK', 'ENG_BANK', 'ENG_LOAN', 'INTERNAL DEVICES', 'PERSONALITY DEVELOPMENT', 'RECIPES', 'VISA', 'WEB', 'AGRICULTURE']
+data loaded
+7251 documents - 0.552MB (training set)
+8482 documents - 0.452MB (test set)
+20 categories
+()
+Extracting features from the training dataset using a sparse vectorizer
+done in 0.184183s at 2.995MB/s
+n_samples: 7251, n_features: 9319
+()
+Extracting features from the test dataset using the same vectorizer
+done in 0.162810s at 2.776MB/s
+n_samples: 8482, n_features: 9319
+()
+________________________________________________________________________________
+Training the data: 
+train time: 0.314s
+test time:  0.007s
+406 2557
+efficiency of classification in loop 1 is: 74.640415
+________________________________________________________________________________
+Training the data: 
+train time: 0.985s
+test time:  0.010s
+1995 2557
+efficiency of classification in loop 2 is: 93.374204
+________________________________________________________________________________
+Training the data: 
+train time: 1.708s
+test time:  0.009s
+2260 2557
+efficiency of classification in loop 3 is: 96.498467
+________________________________________________________________________________
+Training the data: 
+train time: 2.530s
+test time:  0.009s
+2318 2557
+efficiency of classification in loop 4 is: 97.182268
+________________________________________________________________________________
