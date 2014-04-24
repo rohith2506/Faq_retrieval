@@ -2,6 +2,7 @@ import logging
 import numpy as np
 from optparse import OptionParser
 import sys
+import time
 from time import time
 import pylab as pl
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -164,7 +165,6 @@ def main_function():
   print("n_samples: %d, n_features: %d" % X_test.shape)
   print()
 
-
   if opts.select_chi2:
       print("Extracting %d best features by a chi-squared test" %
             opts.select_chi2)
@@ -184,42 +184,44 @@ def main_function():
   else:
       feature_names = np.asarray(vectorizer.get_feature_names())
 
-  print('_' * 80)
-  print("Training the data: ")
-  t0 = time()
-  clf = LinearSVC()
-  clf.fit(X_train,y_train)
-  train_time = time() - t0
-  print("train time: %0.3fs" % train_time)
+  loop = 1
+  while True:
+    print('_' * 80)
+    print("Training the data: ")
+    t0 = time()
+    clf = LinearSVC()
+    clf.fit(X_train,y_train)
+    train_time = time() - t0
+    print("train time: %0.3fs" % train_time)
+    
+    t0 = time()
+    pred = clf.predict(X_test)
+    scores = clf.decision_function(X_test)
+    test_time = time() - t0
+    print("test time:  %0.3fs" % test_time)
+#    return test_data, pred, y_test, scores, train_target_names
+    train_data = train_data + test_data
+    train_target = train_target + test_target
+    X_train = vectorizer.transform(train_data)
+    y_train = train_target
 
-  t0 = time()
-  pred = clf.predict(X_test)
-  scores = clf.decision_function(X_test)
-  test_time = time() - t0
-  print("test time:  %0.3fs" % test_time)
-#  print scores[0]
-  return test_data, pred, y_test, scores, train_target_names
+    for i in range(0,10):
+        print "quest: ",test_data[i]
+        print "Given class: %s" %(train_target_names[y_test[i]])
+        print "Predicted class: %s" %(train_target_names[pred[i]]) 
+        print "#####################"
 
-'''
-  for i in range(0,10):
-      print "quest: ",test_data[i]
-      print "Given class: %s" %(train_target_names[y_test[i]])
-      print "Predicted class: %s" %(train_target_names[pred[i]]) 
-      print "#####################"
+    cnt = 0
+    cnt2 = 0
+    for i in range(0,len(y_test)):
+      if y_test[i]!=-1:
+        if pred[i] == y_test[i]:
+          cnt = cnt + 1
+        cnt2 = cnt2 + 1
 
-
-#  to calculate efficiency
-  cnt = 0
-  cnt2 = 0
-  for i in range(0,len(y_test)):
-    if y_test[i]!=-1:
-      if pred[i] == y_test[i]:
-        cnt = cnt + 1
-      cnt2 = cnt2 + 1
-
-  print cnt,cnt2
-  print "efficiency of classification is: %f" %((cnt + len(y_test) - cnt2)/(1.0*len(y_test))*100)
-'''
+    print cnt,cnt2
+    print "efficiency of classification in loop %d is: %f" %(loop,(cnt + len(y_test) - cnt2)/(1.0*len(y_test))*100)
+    loop = loop + 1
 
 if __name__ == "__main__":
   main_function()
